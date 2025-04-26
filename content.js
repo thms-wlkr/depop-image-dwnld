@@ -1,4 +1,3 @@
-// Create the download button
 const downloadButton = document.createElement('button');
 downloadButton.innerText = "Download Images";
 downloadButton.style.position = 'fixed';
@@ -17,18 +16,20 @@ downloadButton.style.boxShadow = '0px 2px 6px rgba(0,0,0,0.3)';
 document.body.appendChild(downloadButton);
 
 downloadButton.addEventListener('click', () => {
-    // Try to extract product name
-    let productName = document.querySelector('h1')?.innerText.trim() || "depop-image";
+    const productName = document.querySelector('h1')?.innerText.trim() || "depop-image";
 
-    // Find main product images (usually inside some known container)
-    const imageElements = document.querySelectorAll('img');
+    const gallery = document.querySelector('[data-testid="product-image-gallery"]');
+    const images = gallery ? gallery.querySelectorAll('img') : [];
+
+    if (images.length === 0) {
+        alert('No product images found!');
+        return;
+    }
 
     let index = 1;
-    imageElements.forEach(img => {
+    images.forEach(img => {
         const url = img.src;
-
-        // Filter: only grab big, real images (skip icons, small images, etc.)
-        if (url.includes('cloudfront') && url.endsWith('.jpg')) {
+        if (url && (url.endsWith('.jpg') || url.endsWith('.jpeg') || url.endsWith('.png'))) {
             chrome.runtime.sendMessage({
                 url: url,
                 filename: `${productName.replace(/\s+/g, '_')}_${index}.jpg`
@@ -38,6 +39,6 @@ downloadButton.addEventListener('click', () => {
     });
 
     if (index === 1) {
-        alert('No product images found!');
+        alert('No valid images found!');
     }
 });
